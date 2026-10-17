@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171a18">
+    <title>Underground.us | Deducción social</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Cinzel:wght@700;900&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <style>
+      .version-widget {
+        position: fixed;
+        z-index: 20;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        left: max(18px, env(safe-area-inset-left));
+        font-family: Arial, sans-serif;
+      }
+
+      .version-toggle {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 16px;
+        border: 1px solid #d9fb58;
+        border-radius: 24px;
+        background: #171a18;
+        color: #d9fb58;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .version-toggle:focus-visible,
+      .version-close:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 3px;
+      }
+
+      .version-toggle-icon {
+        display: grid;
+        width: 18px;
+        height: 18px;
+        place-items: center;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        font-size: 14px;
+        line-height: 1;
+        transition: transform 180ms ease;
+      }
+
+      .version-widget.is-open .version-toggle-icon {
+        transform: rotate(45deg);
+      }
+
+      .version-panel {
+        position: absolute;
+        bottom: calc(100% + 12px);
+        left: 0;
+        width: min(340px, calc(100vw - 36px));
+        max-height: min(70vh, 520px);
+        overflow-y: auto;
+        padding: 22px;
+        border: 1px solid #454b43;
+        background: #171a18;
+        color: #f2f2e9;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transform: translateY(12px);
+        visibility: hidden;
+        transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+      }
+
+      .version-widget.is-open .version-panel {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+      }
+
+      .version-panel h2 {
+        margin: 0 0 6px;
+        color: #d9fb58;
+        font-size: 22px;
+      }
+
+      .version-panel p {
+        margin: 0;
+        color: #b9c0b8;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .version-panel ul {
+        display: grid;
+        gap: 12px;
+        margin: 18px 0 0;
+        padding-left: 18px;
+        color: #b9c0b8;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .version-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 32px;
+        height: 32px;
+        border: 1px solid #454b43;
+        background: transparent;
+        color: #f2f2e9;
+        cursor: pointer;
+        font: inherit;
+        font-size: 19px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .version-toggle-icon,
+        .version-panel {
+          transition: none;
+        }
+      }
+    </style>
+    <script src="./jugador.js" defer></script>
+    <script src="./partida.js" defer></script>
+    <script src="./index.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="#inicio" aria-label="Underground.us, inicio">
+        <span class="wordmark-mark" aria-hidden="true">U</span>
+        <span>UNDERGROUND<span class="wordmark-dot">.US</span></span>
+      </a>
+      <div class="topbar-tools">
+        <audio id="background-music" src="./Velvet_Hour.mp3" loop preload="none"></audio>
+        <button class="music-toggle" id="music-toggle" type="button" aria-label="Activar música" aria-pressed="false" title="Activar música">
+          <span aria-hidden="true">♫</span>
+        </button>
+        <label class="visually-hidden" for="music-volume">Volumen de la música</label>
+        <input class="music-volume" id="music-volume" type="range" min="0" max="0.5" step="0.01" value="0.16" title="Volumen de la música">
+        <span class="phase-indicator" id="phase-label">PREPARACIÓN</span>
+        <span class="visually-hidden" id="music-status" role="status" aria-live="polite"></span>
+      </div>
+    </header>
+
+    <main id="inicio" class="app-shell">
+      <section class="intro" aria-labelledby="game-title">
+        <p class="eyebrow"><span class="status-light"></span> JUEGO DE DEDUCCIÓN SOCIAL</p>
+        <h1 id="game-title">Bajo tierra,<br>nadie es <em>quien dice.</em></h1>
+        <p class="intro-copy">Una mina. Tres bandos. Cada voto cambia lo que queda en la superficie.</p>
+        <div class="intro-stamp" aria-hidden="true">
+          <span>EXPEDIENTE</span>
+          <strong>U—07</strong>
+          <span>ACCESO RESTRINGIDO</span>
+        </div>
+        <div class="intro-rule" aria-hidden="true"><span></span><span></span><span></span></div>
+      </section>
+
+      <section class="mode-selector" id="mode-selector" aria-label="Selecciona el modo de juego">
+        <p class="eyebrow">ELIGE CÓMO JUGAR</p>
+        <button class="mode-option" id="choose-local-mode" type="button">
+          <span>
+            <strong>MODO LOCAL</strong>
+            <small>PASS &amp; PLAY · Un dispositivo para toda la cuadrilla</small>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </button>
+        <button class="mode-option" id="choose-lan-mode" type="button">
+          <span>
+            <strong>MODO MULTIJUGADOR WI-FI</strong>
+            <small>LAN · Cada jugador usa su propio teléfono</small>
+          </span>
+          <span class="mode-arrow" aria-hidden="true">↗</span>
+        </button>
+      </section>
+
+      <section class="setup-panel" id="setup-panel" aria-labelledby="setup-title" hidden>
+        <button class="mode-back" id="back-from-local" type="button">← Volver a modos</button>
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">NUEVA PARTIDA</p>
+            <h2 id="setup-title">Reúne a la cuadrilla</h2>
+          </div>
+          <span class="player-count" id="player-count">0 <small>/ 15</small></span>
+        </div>
+
+        <form class="add-player-form" id="add-player-form">
+          <label class="visually-hidden" for="player-name">Nombre del jugador</label>
+          <input id="player-name" name="nombre" type="text" maxlength="24" autocomplete="off" placeholder="Nombre del jugador" required>
+          <button class="icon-button add-button" id="add-player" type="button" aria-label="Añadir jugador" title="Añadir jugador">
+            <span aria-hidden="true">+</span>
+          </button>
+        </form>
+
+        <div class="roster-heading">
+          <h3>Lista de jugadores</h3>
+          <span id="roster-hint">Mínimo 6 para comenzar</span>
+        </div>
+        <ul class="player-list" id="player-list" aria-live="polite"></ul>
+        <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+
+        <div class="settings-row">
+          <label for="discussion-time">Tiempo de discusión</label>
+          <output id="discussion-output" for="discussion-time">70 s</output>
+        </div>
+        <input class="time-slider" id="discussion-time" type="range" min="30" max="180" step="10" value="70">
+        <div class="slider-labels" aria-hidden="true"><span>30 s</span><span>180 s</span></div>
+
+        <details class="rules-details">
+          <summary>Reglas rápidas <span aria-hidden="true">+</span></summary>
+          <div class="rules-content">
+            <p><strong>Topos</strong> buscan descubrir y encarcelar al resto.</p>
+            <p><strong>Mineros</strong> se conocen entre sí y tratan de encarcelar a un Topo.</p>
+            <p><strong>Neutrales</strong> persiguen la condición particular de su rol.</p>
+            <p>La partida admite de 6 a 15 jugadores. Los turnos se mezclan en cada fase.</p>
+          </div>
+        </details>
+
+        <button class="start-button" id="start-game" type="button" disabled>
+          <span>Comenzar partida</span><span aria-hidden="true">↗</span>
+        </button>
+      </section>
+
+      <section class="lan-panel" id="lan-panel" aria-labelledby="lan-title" hidden>
+        <button class="mode-back" id="back-from-lan" type="button">← Volver a modos</button>
+        <p class="eyebrow">VERSIÓN 3.2 · RED LOCAL</p>
+        <h2 id="lan-title">Multijugador Wi-Fi</h2>
+        <p class="lan-description">Conecta todos los dispositivos a la misma red Wi-Fi. El host crea una sala y comparte el QR o el enlace local.</p>
+
+        <div class="lan-host-view" id="lan-host-view">
+          <button class="start-button" id="create-lan-room" type="button">
+            <span>Crear sala LAN</span><span aria-hidden="true">↗</span>
+          </button>
+          <p class="form-message" id="lan-message" role="status" aria-live="polite"></p>
+          <div class="lan-room-details" id="lan-room-details" hidden>
+            <h3>Escanea el código para unirte</h3>
+            <img class="lan-qr" id="lan-qr" alt="Código QR para unirse a la sala LAN">
+            <p class="lan-link-label">Enlace directo</p>
+            <a class="lan-direct-link" id="lan-direct-link"></a>
+            <p class="lan-room-code">Código de sala: <strong id="lan-room-code"></strong></p>
+            <div class="settings-row lan-discussion-setting">
+              <label for="lan-discussion-time">Tiempo de discusión compartido</label>
+              <output id="lan-discussion-output" for="lan-discussion-time">70 s</output>
+            </div>
+            <input class="time-slider" id="lan-discussion-time" type="range" min="30" max="180" step="10" value="70">
+            <div class="slider-labels" aria-hidden="true"><span>30 s</span><span>180 s</span></div>
+            <div class="lan-roster-heading">
+              <h3>Jugadores conectados</h3>
+              <span id="lan-player-count">0 / 15</span>
+            </div>
+            <ul class="lan-player-list" id="lan-player-list" aria-live="polite"></ul>
+            <button class="start-button" id="start-lan-game" type="button" disabled>
+              <span>Iniciar Partida LAN</span><span aria-hidden="true">↗</span>
+            </button>
+            <p class="form-message" id="lan-game-status" role="status" aria-live="polite"></p>
+            <button class="primary-action" id="lan-skip-discussion" type="button" hidden>Finalizar discusión</button>
+          </div>
+        </div>
+
+        <form class="lan-join-view" id="lan-join-view" hidden>
+          <p class="lan-join-room">Sala <strong id="lan-join-room-code"></strong></p>
+          <label class="secret-label" for="lan-player-name">Tu apodo</label>
+          <input id="lan-player-name" name="nickname" type="text" maxlength="24" autocomplete="nickname" placeholder="Escribe tu apodo" required>
+          <button class="start-button" id="join-lan-room" type="submit">
+            <span>Unirme a la sala</span><span aria-hidden="true">↗</span>
+          </button>
+          <p class="form-message" id="lan-join-message" role="status" aria-live="polite"></p>
+        </form>
+        <div class="lan-player-wait" id="lan-player-wait" hidden>
+          <p class="eyebrow">SALA LAN · <span id="lan-wait-room-code"></span></p>
+          <h3>Esperando al host</h3>
+          <p class="lan-description">Tu rol y tus informes se enviarán de forma privada. La discusión, votación y revelación avanzarán sincronizadas.</p>
+          <ul class="lan-player-list" id="lan-wait-player-list" aria-live="polite"></ul>
+        </div>
+        <div class="lan-private-assignment" id="lan-private-assignment" hidden></div>
+      </section>
+
+      <section class="game-panel" id="game-panel" aria-live="polite" hidden>
+        <div id="game-content"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>UNDERGROUND.US</span>
+      <span>NINGÚN SECRETO DURA PARA SIEMPRE</span>
+    </footer>
+
+    <aside class="version-widget" id="version-widget">
+      <section class="version-panel" id="version-panel" aria-labelledby="version-title" aria-hidden="true">
+        <button class="version-close" id="version-close" type="button" aria-label="Cerrar cambios">×</button>
+        <h2 id="version-title">Versión 2.2</h2>
+        <p>¡Nuevos ajustes de roles y feedback táctil!</p>
+        <ul>
+          <li>Se eliminó el rol Vigía para evitar que se solapara con el Investigador.</li>
+          <li>El Investigador recibe una pista normal y puede revelar una pista adicional con un botón; al usarla, espera una ronda completa antes de volver a usarla.</li>
+          <li>El Alcalde puede activar su voto doble durante su turno; si no lo activa, su voto cuenta por uno.</li>
+          <li>El Silenciador puede elegir entre todos los jugadores vivos y vuelve a tener disponible su habilidad cada dos rondas.</li>
+          <li>El Fraude siempre puede consultar los votos anteriores durante su turno y puede activar una única anulación por partida.</li>
+          <li>Los ajustes de habilidades y votación se aplican tanto al modo local como al multijugador LAN.</li>
+          <li>Los botones de habilidad ahora se hunden al presionarlos, generan una onda luminosa, rebotan suavemente al soltarlos y solicitan una vibración breve de 30 ms en dispositivos compatibles.</li>
+          <li>El feedback de las habilidades es estrictamente sin sonido.</li>
+          <li>Ocho minijuegos para desbloquear los informes, seleccionados al azar con la misma probabilidad en cada turno.</li>
+          <li>Terminal de números: ordena las fichas para descifrar el acceso; computadora: copia correctamente la frase secreta.</li>
+          <li>Radio de la mina: encuentra y mantén la frecuencia correcta para decodificar la transmisión.</li>
+          <li>Tubo neumático: completa una secuencia de cuatro ingredientes para recibir el informe en una hoja desplegable.</li>
+          <li>Linterna UV: ilumina la tinta invisible para revelar la pista y el informe confidencial.</li>
+          <li>Teléfono de disco retro: marca una extensión aleatoria de cinco cifras para escuchar la transcripción.</li>
+          <li>Proyector de película vintage: gira la manivela para revelar progresivamente el informe y apaga la proyección al pasar el dispositivo.</li>
+          <li>Elevador de nueve pisos: encuentra el piso asignado, restablece la energía y abre la carpeta confidencial en la oficina de la mina.</li>
+          <li>Cada informe es privado y puede incluir pistas, eventos y las notas del Detective; al terminar, el dispositivo pasa al siguiente jugador.</li>
+          <li>Las pistas del informe local nunca mencionan al jugador que las recibe; los eventos secretos y sus condiciones de victoria se mantienen intactos.</li>
+          <li>El Comunicador decide si envía o aplaza su mensaje dentro de su propio turno de informe y luego recibe el informe sin tener un segundo turno en la misma fase.</li>
+          <li>Los ocho minijuegos interactivos también están disponibles en LAN; cada jugador debe completar su reto para revelar su informe privado.</li>
+          <li>Los cambios de roles, minijuegos, reglas y correcciones se mantendrán coherentes entre el modo local y el multijugador LAN.</li>
+          <li>Interfaces adaptables a móviles, con controles táctiles y desplazamiento para leer informes extensos.</li>
+        </ul>
+      </section>
+      <button
+        class="version-toggle"
+        id="version-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="version-panel"
+      >
+        <span>Versión 2.2</span>
+        <span class="version-toggle-icon" aria-hidden="true">+</span>
+      </button>
+    </aside>
+    <script>
+      (() => {
+        const widget = document.querySelector('#version-widget');
+        const toggle = document.querySelector('#version-toggle');
+        const panel = document.querySelector('#version-panel');
+        const close = document.querySelector('#version-close');
+
+        function setOpen(open) {
+          widget.classList.toggle('is-open', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          panel.setAttribute('aria-hidden', String(!open));
+        }
+
+        toggle.addEventListener('click', () => {
+          setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        });
+        close.addEventListener('click', () => {
+          setOpen(false);
+          toggle.focus();
+        });
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+            setOpen(false);
+            toggle.focus();
+          }
+        });
+        document.addEventListener('click', (event) => {
+          if (!widget.contains(event.target)) setOpen(false);
+        });
+      })();
+    </script>
+  </body>
+</html>
