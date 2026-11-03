@@ -119,6 +119,20 @@
         font-size: 19px;
       }
 
+      @media (max-width: 520px) {
+        .version-widget {
+          position: relative;
+          inset: auto;
+          width: fit-content;
+          margin: 0 18px max(18px, env(safe-area-inset-bottom)) auto;
+        }
+
+        .version-panel {
+          right: 0;
+          left: auto;
+        }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .version-toggle-icon,
         .version-panel {
@@ -128,6 +142,7 @@
     </style>
     <script src="./jugador.js" defer></script>
     <script src="./partida.js" defer></script>
+    <script src="./feedback.js" defer></script>
     <script src="./index.js" defer></script>
   </head>
   <body>
@@ -293,31 +308,10 @@
     <aside class="version-widget" id="version-widget">
       <section class="version-panel" id="version-panel" aria-labelledby="version-title" aria-hidden="true">
         <button class="version-close" id="version-close" type="button" aria-label="Cerrar cambios">×</button>
-        <h2 id="version-title">Versión 2.2</h2>
-        <p>¡Nuevos ajustes de roles y feedback táctil!</p>
-        <ul>
-          <li>Se eliminó el rol Vigía para evitar que se solapara con el Investigador.</li>
-          <li>El Investigador recibe una pista normal y puede revelar una pista adicional con un botón; al usarla, espera una ronda completa antes de volver a usarla.</li>
-          <li>El Alcalde puede activar su voto doble durante su turno; si no lo activa, su voto cuenta por uno.</li>
-          <li>El Silenciador puede elegir entre todos los jugadores vivos y vuelve a tener disponible su habilidad cada dos rondas.</li>
-          <li>El Fraude siempre puede consultar los votos anteriores durante su turno y puede activar una única anulación por partida.</li>
-          <li>Los ajustes de habilidades y votación se aplican tanto al modo local como al multijugador LAN.</li>
-          <li>Los botones de habilidad ahora se hunden al presionarlos, generan una onda luminosa, rebotan suavemente al soltarlos y solicitan una vibración breve de 30 ms en dispositivos compatibles.</li>
-          <li>El feedback de las habilidades es estrictamente sin sonido.</li>
-          <li>Ocho minijuegos para desbloquear los informes, seleccionados al azar con la misma probabilidad en cada turno.</li>
-          <li>Terminal de números: ordena las fichas para descifrar el acceso; computadora: copia correctamente la frase secreta.</li>
-          <li>Radio de la mina: encuentra y mantén la frecuencia correcta para decodificar la transmisión.</li>
-          <li>Tubo neumático: completa una secuencia de cuatro ingredientes para recibir el informe en una hoja desplegable.</li>
-          <li>Linterna UV: ilumina la tinta invisible para revelar la pista y el informe confidencial.</li>
-          <li>Teléfono de disco retro: marca una extensión aleatoria de cinco cifras para escuchar la transcripción.</li>
-          <li>Proyector de película vintage: gira la manivela para revelar progresivamente el informe y apaga la proyección al pasar el dispositivo.</li>
-          <li>Elevador de nueve pisos: encuentra el piso asignado, restablece la energía y abre la carpeta confidencial en la oficina de la mina.</li>
-          <li>Cada informe es privado y puede incluir pistas, eventos y las notas del Detective; al terminar, el dispositivo pasa al siguiente jugador.</li>
-          <li>Las pistas del informe local nunca mencionan al jugador que las recibe; los eventos secretos y sus condiciones de victoria se mantienen intactos.</li>
-          <li>El Comunicador decide si envía o aplaza su mensaje dentro de su propio turno de informe y luego recibe el informe sin tener un segundo turno en la misma fase.</li>
-          <li>Los ocho minijuegos interactivos también están disponibles en LAN; cada jugador debe completar su reto para revelar su informe privado.</li>
-          <li>Los cambios de roles, minijuegos, reglas y correcciones se mantendrán coherentes entre el modo local y el multijugador LAN.</li>
-          <li>Interfaces adaptables a móviles, con controles táctiles y desplazamiento para leer informes extensos.</li>
+        <h2 id="version-title">Versión 2.3</h2>
+        <p>Notas de esta versión</p>
+        <ul aria-label="Notas de la versión 2.3">
+          <li>Se añadió un buzón privado para comentarios y reportes.</li>
         </ul>
       </section>
       <button
@@ -327,10 +321,33 @@
         aria-expanded="false"
         aria-controls="version-panel"
       >
-        <span>Versión 2.2</span>
+        <span>Versión 2.3</span>
         <span class="version-toggle-icon" aria-hidden="true">+</span>
       </button>
     </aside>
+    <aside class="feedback-widget">
+      <button class="feedback-toggle" id="feedback-toggle" type="button" aria-haspopup="dialog">
+        <span aria-hidden="true">✉</span>
+        <span>Enviar comentario</span>
+      </button>
+    </aside>
+    <dialog class="feedback-dialog" id="feedback-dialog" aria-labelledby="feedback-title">
+      <form class="feedback-form" id="feedback-form">
+        <button class="feedback-close" id="feedback-close" type="button" aria-label="Cerrar formulario">×</button>
+        <p class="feedback-kicker">BUZÓN PRIVADO</p>
+        <h2 id="feedback-title">¿Algo que contarnos?</h2>
+        <p class="feedback-description">Comparte un comentario o reporta un problema del juego.</p>
+        <label class="feedback-label" for="feedback-comment">Comentario o reporte <span aria-hidden="true">*</span></label>
+        <textarea id="feedback-comment" name="comment" rows="5" maxlength="2000" required placeholder="Escribe tu mensaje..."></textarea>
+        <label class="feedback-label" for="feedback-nickname">Apodo <span>(opcional)</span></label>
+        <input id="feedback-nickname" name="nickname" type="text" maxlength="40" autocomplete="nickname" placeholder="Jugador Anónimo">
+        <p class="feedback-status" id="feedback-status" role="alert" aria-live="polite"></p>
+        <button class="feedback-submit" id="feedback-submit" type="submit">
+          <span>Enviar comentario</span><span aria-hidden="true">↗</span>
+        </button>
+      </form>
+    </dialog>
+    <p class="feedback-toast" id="feedback-toast" role="status" aria-live="polite" hidden></p>
     <script>
       (() => {
         const widget = document.querySelector('#version-widget');
